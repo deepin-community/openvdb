@@ -1,0 +1,18 @@
+Description: llvm definitions flags
+Author: Mathieu Malaterre <malat@debian.org>
+Bug-Debian: https://bugs.debian.org/1025058
+Forwarded: https://gitlab.kitware.com/cmake/cmake/-/issues/24208
+Last-Update: 2022-11-29
+
+Index: openvdb/openvdb_ax/openvdb_ax/CMakeLists.txt
+===================================================================
+--- openvdb.orig/openvdb_ax/openvdb_ax/CMakeLists.txt
++++ openvdb/openvdb_ax/openvdb_ax/CMakeLists.txt
+@@ -249,6 +249,7 @@ set(OPENVDB_AX_CORE_DEPENDENT_LIBS
+ )
+ 
+ set(OPENVDB_AX_PUBLIC_DEFINES ${LLVM_DEFINITIONS})
++separate_arguments(OPENVDB_AX_PUBLIC_DEFINES)
+ set(OPENVDB_AX_PRIVATE_DEFINES "")
+ set(OPENVDB_AX_PUBLIC_OPTIONS "")
+ 

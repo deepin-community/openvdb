@@ -1,0 +1,54 @@
+From 2c83ae6ec6887fe9e39a46228f3fa5a2492f9725 Mon Sep 17 00:00:00 2001
+From: Mathieu Malaterre <mathieu.malaterre@gmail.com>
+Date: Mon, 28 Nov 2022 14:06:16 +0100
+Subject: [PATCH] Prefer fixed-width integer types instead of size_t
+
+An implementation is free to use any representation it likes for size_t.
+In general you'll have 32-bit size_t on 32-bit programs.
+
+Fixes warning:
+
+openvdb_ax/openvdb_ax/codegen/StandardFunctions.cc: In instantiation of 'SeedType openvdb::v10_0::ax::codegen::{anonymous}::hashToSeed(size_t) [with SeedType = unsigned int; size_t = unsigned int]':
+openvdb_ax/openvdb_ax/codegen/StandardFunctions.cc:978:76:   required from here
+openvdb_ax/openvdb_ax/codegen/StandardFunctions.cc:56:19: warning: right shift count >= width of type [-Wshift-count-overflow]
+   56 |     } while (hash >>= sizeof(SeedType) * 8);
+      |              ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~
+---
+ openvdb_ax/openvdb_ax/codegen/StandardFunctions.cc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+Index: openvdb/openvdb_ax/openvdb_ax/codegen/StandardFunctions.cc
+===================================================================
+--- openvdb.orig/openvdb_ax/openvdb_ax/codegen/StandardFunctions.cc
++++ openvdb/openvdb_ax/openvdb_ax/codegen/StandardFunctions.cc
+@@ -49,7 +49,7 @@ namespace
+ // that fit into an unsigned int, and then shift those bytes out of the
+ // hash. We repeat until we have no bits left in the hash.
+ template <typename SeedType>
+-inline SeedType hashToSeed(size_t hash) {
++inline SeedType hashToSeed(uint64_t hash) {
+     SeedType seed = 0;
+     do {
+         seed ^= (SeedType) hash;
+@@ -955,7 +955,7 @@ inline FunctionGroup::UniquePtr axrand32
+             // (e.g. -0 and +0 must return the same hash value, etc). Other than these
+             // special cases, this function will usually just copy the binary
+             // representation of a float into the resultant `size_t`
+-            const size_t hash = std::hash<double>()(seed);
++            const uint64_t hash = std::hash<double>()(seed);
+ 
+             // Now that we have a reliable hash (with special floating-point cases taken
+             // care of), we proceed to use this hash to seed a random number generator.
+Index: openvdb/openvdb_ax/openvdb_ax/test/integration/TestStandardFunctions.cc
+===================================================================
+--- openvdb.orig/openvdb_ax/openvdb_ax/test/integration/TestStandardFunctions.cc
++++ openvdb/openvdb_ax/openvdb_ax/test/integration/TestStandardFunctions.cc
+@@ -1166,7 +1166,7 @@ TestStandardFunctions::rand()
+ void
+ TestStandardFunctions::rand32()
+ {
+-    auto hashToSeed = [](size_t hash) ->
++    auto hashToSeed = [](uint64_t hash) ->
+         std::mt19937::result_type
+     {
+         unsigned int seed = 0;

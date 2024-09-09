@@ -1,0 +1,19 @@
+Description: Fix compilation error with missing atomic
+ TBB requires -latomic on arch where copy-on-swap is missing
+ (eg ppc32, armel...)
+Author: Mathieu Malaterre <malat@debian.org>
+Forwarded: no
+Last-Update: 2021-08-27
+
+Index: openvdb/openvdb/openvdb/CMakeLists.txt
+===================================================================
+--- openvdb.orig/openvdb/openvdb/CMakeLists.txt
++++ openvdb/openvdb/openvdb/CMakeLists.txt
+@@ -246,6 +246,7 @@ endif()
+ 
+ if(UNIX)
+   list(APPEND OPENVDB_CORE_DEPENDENT_LIBS Threads::Threads)
++  list(APPEND OPENVDB_CORE_DEPENDENT_LIBS atomic)
+ endif()
+ 
+ # Pull in Boost last as houdini's boost (hboost) is fully namespaced and libs

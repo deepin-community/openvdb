@@ -1,0 +1,16 @@
+Do not use jemalloc
+
+See the following bug report for full description:
+
+https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=951704
+
+In order to ship python3 module (and have simple build compilation step),
+tbbmalloc is used instead.
+
+Some users may want to use NanoVDB with CUDA. Since packages in main cannot be
+build with nvcc, a user will need to recompile openvdb locally using:
+
+% sudo apt install --no-install-recommends nvidia-cuda-toolkit
+% debuild -e WITH_CUDA=ON -B
+
+ -- Mathieu Malaterre <malat@debian.org>  Thu, 24 Nov 2022 08:38:30 +0100

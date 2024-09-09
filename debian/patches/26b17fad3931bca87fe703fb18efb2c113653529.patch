@@ -1,0 +1,10 @@
+From 26b17fad3931bca87fe703fb18efb2c113653529 Mon Sep 17 00:00:00 2001
+From: Andre Pradhana <andre.pradhana@gmail.com>
+Date: Mon, 7 Nov 2022 10:44:44 -0800
+Subject: [PATCH] Add install in CMakeLists for vdb_tool.
+
+Signed-off-by: Andre Pradhana <andre.pradhana@gmail.com>
+---
+ openvdb_cmd/vdb_tool/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+

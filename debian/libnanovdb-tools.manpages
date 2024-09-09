@@ -1,0 +1,3 @@
+debian/nanovdb_convert.1
+debian/nanovdb_print.1
+debian/nanovdb_validate.1

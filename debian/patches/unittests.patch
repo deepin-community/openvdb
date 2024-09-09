@@ -1,0 +1,71 @@
+Description: unit test would not run
+ Add LD_LIBRARY_PATH so that unit test can run
+Author: Mathieu Malaterre <malat@debian.org>
+Forwarded: no
+Last-Update: 2021-08-27
+
+Index: openvdb/openvdb/openvdb/unittest/CMakeLists.txt
+===================================================================
+--- openvdb.orig/openvdb/openvdb/unittest/CMakeLists.txt
++++ openvdb/openvdb/openvdb/unittest/CMakeLists.txt
+@@ -212,6 +212,9 @@ endif()
+ 
+ target_link_libraries(vdb_test ${OPENVDB_TEST_DEPENDENT_LIBS})
+ add_test(NAME vdb_unit_test COMMAND $<TARGET_FILE:vdb_test> -v)
++set_property(TEST vdb_unit_test PROPERTY ENVIRONMENT
++   LD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR}/..
++   )
+ 
+ # For the undefined behaviour sanitizer, add the suppression file and
+ # additional options
+@@ -223,5 +226,5 @@ set(UBSAN_SUPRESSION_FILE ${PATH_TO_PROJ
+ 
+ set_tests_properties(vdb_unit_test PROPERTIES
+     ENVIRONMENT
+-      "$<$<CONFIG:UBSAN>:UBSAN_OPTIONS=halt_on_error=1 report_error_type=1 suppressions=${UBSAN_SUPRESSION_FILE}>")
++      "$<$<CONFIG:UBSAN>:UBSAN_OPTIONS=halt_on_error=1 report_error_type=1 suppressions=${UBSAN_SUPRESSION_FILE}>;LD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR}/..")
+ 
+Index: openvdb/openvdb/openvdb/python/CMakeLists.txt
+===================================================================
+--- openvdb.orig/openvdb/openvdb/python/CMakeLists.txt
++++ openvdb/openvdb/openvdb/python/CMakeLists.txt
+@@ -337,6 +337,6 @@ if(OPENVDB_BUILD_PYTHON_UNITTESTS)
+       ENVIRONMENT "PYTHONPATH=${PYTHONPATH};${PYOPENVDB_TEST_ENV}")
+   else()
+     set_tests_properties(pytest PROPERTIES
+-      ENVIRONMENT "PYTHONPATH=$ENV{PYTHONPATH}:${PYVDB_WORKING_DIR};${PYOPENVDB_TEST_ENV}")
++      ENVIRONMENT "PYTHONPATH=$ENV{PYTHONPATH}:${PYVDB_WORKING_DIR};${PYOPENVDB_TEST_ENV};LD_LIBRARY_PATH=${PYVDB_WORKING_DIR}/..:${PYVDB_WORKING_DIR}/../../../openvdb_ax/openvdb_ax")
+   endif()
+ endif()
+Index: openvdb/nanovdb/nanovdb/unittest/CMakeLists.txt
+===================================================================
+--- openvdb.orig/nanovdb/nanovdb/unittest/CMakeLists.txt
++++ openvdb/nanovdb/nanovdb/unittest/CMakeLists.txt
+@@ -49,3 +49,7 @@ endif()
+ add_executable(nanovdb_test_openvdb "TestOpenVDB.cc")
+ target_link_libraries(nanovdb_test_openvdb PRIVATE nanovdb GTest::GTest GTest::Main)
+ add_test(nanovdb_openvdb_unit_test nanovdb_test_openvdb)
++
++set_tests_properties(nanovdb_openvdb_unit_test PROPERTIES
++  ENVIRONMENT
++  "LD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR}/../../../openvdb/openvdb")
+Index: openvdb/openvdb_ax/openvdb_ax/test/CMakeLists.txt
+===================================================================
+--- openvdb.orig/openvdb_ax/openvdb_ax/test/CMakeLists.txt
++++ openvdb/openvdb_ax/openvdb_ax/test/CMakeLists.txt
+@@ -29,6 +29,9 @@ if(TARGET vdb_ax AND OPENVDB_AX_TEST_CMD
+       -DDOWNLOAD_VDBS=${OPENVDB_AX_TEST_CMD_DOWNLOADS}
+       -DCMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}
+       -P ${CMAKE_CURRENT_LIST_DIR}/TestAXCmd.cmake)
++  set_tests_properties(vdb_ax_cmd_test PROPERTIES
++    ENVIRONMENT
++      "LD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR}/..:${CMAKE_CURRENT_BINARY_DIR}/../../../openvdb/openvdb")
+ elseif(OPENVDB_BUILD_BINARIES)
+   message(WARNING "Unable to test the vdb_ax binary as the vdb_ax target was not found!")
+ endif()
+@@ -143,4 +146,4 @@ set(UBSAN_SUPRESSION_FILE ${PATH_TO_PROJ
+ 
+ set_tests_properties(vdb_ax_unit_test PROPERTIES
+     ENVIRONMENT
+-      "$<$<CONFIG:UBSAN>:UBSAN_OPTIONS=halt_on_error=1 report_error_type=1 suppressions=${UBSAN_SUPRESSION_FILE}>")
++      "$<$<CONFIG:UBSAN>:UBSAN_OPTIONS=halt_on_error=1 report_error_type=1 suppressions=${UBSAN_SUPRESSION_FILE}>;LD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR}/..:${CMAKE_CURRENT_BINARY_DIR}/../../../openvdb/openvdb")

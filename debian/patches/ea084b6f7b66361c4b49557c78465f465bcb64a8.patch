@@ -1,0 +1,64 @@
+From ea084b6f7b66361c4b49557c78465f465bcb64a8 Mon Sep 17 00:00:00 2001
+From: Mathieu Malaterre <mathieu.malaterre@gmail.com>
+Date: Tue, 29 Nov 2022 08:14:07 +0100
+Subject: [PATCH] Use fixed-width integers to remove warnings (32bits)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Removes:
+
+/<<PKGBUILDDIR>>/nanovdb/nanovdb/unittest/TestNanoVDB.cc:1729:16: warning: unsigned conversion from ‘long long int’ to ‘size_t’ {aka ‘unsigned int’} changes value from ‘45634923663’ to ‘2685250703’ [-Woverflow]
+ 1729 |       offset = 45634923663;
+      |                ^~~~~~~~~~~
+/<<PKGBUILDDIR>>/nanovdb/nanovdb/unittest/TestNanoVDB.cc:1757:16: warning: unsigned conversion from ‘long long int’ to ‘size_t’ {aka ‘unsigned int’} changes value from ‘45634923663’ to ‘2685250703’ [-Woverflow]
+ 1757 |       offset = 45634923663;
+      |                ^~~~~~~~~~~
+/<<PKGBUILDDIR>>/nanovdb/nanovdb/unittest/TestNanoVDB.cc: In member function ‘virtual void TestNanoVDB_BasicGrid_Test::TestBody()’:
+/<<PKGBUILDDIR>>/nanovdb/nanovdb/unittest/TestNanoVDB.cc:2286:39: warning: narrowing conversion of ‘nanovdb::Grid<nanovdb::Tree<nanovdb::RootNode<nanovdb::InternalNode<nanovdb::InternalNode<nanovdb::LeafNode<float, nanovdb::Coord, nanovdb::Mask, 3>, 4>, 5> > > >::memUsage()’ from ‘uint64_t’ {aka ‘long long unsigned int’} to ‘size_t’ {aka ‘unsigned int’} [-Wnarrowing]
+ 2286 |     size_t bytes[6] = {GridT::memUsage(), TreeT::memUsage(), RootT::memUsage(1), NodeT2::memUsage(), NodeT1::memUsage(), LeafT::DataType::memUsage()};
+      |                        ~~~~~~~~~~~~~~~^~
+/<<PKGBUILDDIR>>/nanovdb/nanovdb/unittest/TestNanoVDB.cc:2286:58: warning: narrowing conversion of ‘nanovdb::Tree<nanovdb::RootNode<nanovdb::InternalNode<nanovdb::InternalNode<nanovdb::LeafNode<float, nanovdb::Coord, nanovdb::Mask, 3>, 4>, 5> > >::memUsage()’ from ‘uint64_t’ {aka ‘long long unsigned int’} to ‘size_t’ {aka ‘unsigned int’} [-Wnarrowing]
+ 2286 |     size_t bytes[6] = {GridT::memUsage(), TreeT::memUsage(), RootT::memUsage(1), NodeT2::memUsage(), NodeT1::memUsage(), LeafT::DataType::memUsage()};
+      |                                           ~~~~~~~~~~~~~~~^~
+/<<PKGBUILDDIR>>/nanovdb/nanovdb/unittest/TestNanoVDB.cc:2286:77: warning: narrowing conversion of ‘nanovdb::RootNode<nanovdb::InternalNode<nanovdb::InternalNode<nanovdb::LeafNode<float, nanovdb::Coord, nanovdb::Mask, 3>, 4>, 5> >::memUsage(1)’ from ‘uint64_t’ {aka ‘long long unsigned int’} to ‘size_t’ {aka ‘unsigned int’} [-Wnarrowing]
+ 2286 |     size_t bytes[6] = {GridT::memUsage(), TreeT::memUsage(), RootT::memUsage(1), NodeT2::memUsage(), NodeT1::memUsage(), LeafT::DataType::memUsage()};
+      |                                                              ~~~~~~~~~~~~~~~^~~
+/<<PKGBUILDDIR>>/nanovdb/nanovdb/unittest/TestNanoVDB.cc:2286:147: warning: narrowing conversion of ‘nanovdb::LeafData<float, nanovdb::Coord, nanovdb::Mask, 3>::memUsage()’ from ‘uint64_t’ {aka ‘long long unsigned int’} to ‘size_t’ {aka ‘unsigned int’} [-Wnarrowing]
+ 2286 |     size_t bytes[6] = {GridT::memUsage(), TreeT::memUsage(), RootT::memUsage(1), NodeT2::memUsage(), NodeT1::memUsage(), LeafT::DataType::memUsage()};
+      |                                                                                                                          ~~~~~~~~~~~~~~~~~~~~~~~~~^~
+---
+ nanovdb/nanovdb/unittest/TestNanoVDB.cc | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/nanovdb/nanovdb/unittest/TestNanoVDB.cc b/nanovdb/nanovdb/unittest/TestNanoVDB.cc
+index d4cc3bf6e..22558626c 100644
+--- a/nanovdb/nanovdb/unittest/TestNanoVDB.cc
++++ b/nanovdb/nanovdb/unittest/TestNanoVDB.cc
+@@ -1723,7 +1723,7 @@ TEST_F(TestNanoVDB, InternalNodeValueMask)
+       EXPECT_EQ(end-start, 28);// padding is 28 bytes
+ 
+       // use padding for an offset and check that it doesn't interfere with other data
+-      size_t &offset = *reinterpret_cast<size_t*>(&(data->mStdDevi)+1);
++      uint64_t &offset = *reinterpret_cast<uint64_t*>(&(data->mStdDevi)+1);
+       data->mStdDevi = true;
+       data->mTable[0].child = 123434214;
+       offset = 45634923663;
+@@ -1751,7 +1751,7 @@ TEST_F(TestNanoVDB, InternalNodeValueMask)
+       EXPECT_EQ(end-start, 28);// padding is 28 bytes
+ 
+       // use padding for an offset and check that it doesn't interfere with other data
+-      size_t &offset = *reinterpret_cast<size_t*>(&(data->mStdDevi)+1);
++      uint64_t &offset = *reinterpret_cast<uint64_t*>(&(data->mStdDevi)+1);
+       data->mStdDevi = true;
+       data->mTable[0].child = 123434214;
+       offset = 45634923663;
+@@ -2283,7 +2283,7 @@ TEST_F(TestNanoVDB, BasicGrid)
+     EXPECT_EQ(sizeof(TreeT), nanovdb::AlignUp<NANOVDB_DATA_ALIGNMENT>(4*8 + 3*4 + 3*4 + 8));
+     EXPECT_EQ(sizeof(TreeT), size_t(4*8 + 3*4 + 3*4 + 8));// should already be 32 byte aligned
+ 
+-    size_t bytes[6] = {GridT::memUsage(), TreeT::memUsage(), RootT::memUsage(1), NodeT2::memUsage(), NodeT1::memUsage(), LeafT::DataType::memUsage()};
++    uint64_t bytes[6] = {GridT::memUsage(), TreeT::memUsage(), RootT::memUsage(1), NodeT2::memUsage(), NodeT1::memUsage(), LeafT::DataType::memUsage()};
+     for (int i = 1; i < 6; ++i)
+         bytes[i] += bytes[i - 1]; // Byte offsets to: tree, root, internal nodes, leafs, total
+     std::unique_ptr<uint8_t[]> pool(new uint8_t[bytes[5] + NANOVDB_DATA_ALIGNMENT]);
