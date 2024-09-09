@@ -154,7 +154,8 @@ CMAKE_EXTRA_FLAGS = \
 	-DUSE_LOG4CPLUS:BOOL=ON \
 	-DUSE_NANOVDB:BOOL=ON \
 	-DUSE_NUMPY:BOOL=ON \
-	-DUSE_PNG:BOOL=ON \
+	-DUSE_PNG:BOOL=ON 
+
 
 VDB_MANPAGES = debian/vdb_lod.1 debian/vdb_print.1 debian/vdb_render.1 debian/vdb_view.1
 ifeq ($(WITH_VDB_TOOL),ON)
@@ -164,8 +165,8 @@ endif
 pkg_arun = libopenvdb-ax-tools
 pkg_nrun = libnanovdb-tools
 pkg_orun = libopenvdb-tools
-pkg_alib = libopenvdb-ax$(VER_SONAME)t64
-pkg_olib = libopenvdb$(VER_SONAME)t64
+pkg_alib = libopenvdb-ax$(VER_SONAME)
+pkg_olib = libopenvdb$(VER_SONAME)
 pkg_adev = libopenvdb-ax-dev
 pkg_ndev = libnanovdb-dev
 pkg_odev = libopenvdb-dev
@@ -202,7 +203,7 @@ override_dh_install-arch: manpages
 	dh_install -p$(pkg_adev) debian/tmp/usr/include/openvdb_ax* usr/include
 	dh_install -p$(pkg_ndev) debian/tmp/usr/include/nanovdb* usr/include
 	dh_install -p$(pkg_odev) -Xax debian/tmp/usr/include/openvdb* usr/include
-	dh_install -p$(pkg_py)  debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/$(PYVERS)/dist-packages/pyopenvdb.so      usr/lib/$(PYVERS)/dist-packages/
+	dh_install -p$(pkg_py)  debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/$(PYVERS)/dist-packages/pyopenvdb.*.so      usr/lib/$(PYVERS)/dist-packages/
 
 override_dh_auto_build-indep:
 	dh_auto_build -- doc

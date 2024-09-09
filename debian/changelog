@@ -1,3 +1,10 @@
+openvdb (11.0.0-0deepin1) unstable; urgency=medium
+
+  * Revert t64.
+  * New upstream version.
+
+ -- xiangzelong <xiangzelong@deepin.org>  Mon, 09 Sep 2024 15:53:05 +0800
+
 openvdb (10.0.1-2.1) unstable; urgency=medium
 
   * Non-maintainer upload.

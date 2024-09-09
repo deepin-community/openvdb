@@ -52,9 +52,9 @@ endif()
 
 ###### Version
 
-set(OpenVDB_MAJOR_VERSION 10)
+set(OpenVDB_MAJOR_VERSION 11)
 set(OpenVDB_MINOR_VERSION 0)
-set(OpenVDB_PATCH_VERSION 1)
+set(OpenVDB_PATCH_VERSION 0)
 set(OpenVDB_VERSION "${OpenVDB_MAJOR_VERSION}.${OpenVDB_MINOR_VERSION}.${OpenVDB_PATCH_VERSION}")
 
 project(OpenVDB LANGUAGES CXX VERSION ${OpenVDB_VERSION})
@@ -89,8 +89,8 @@ cmake_dependent_option(OPENVDB_INSTALL_CMAKE_MODULES
 
 option(USE_HOUDINI [=[
 Build the library against a Houdini installation. Turns on automatically if OPENVDB_BUILD_HOUDINI_PLUGIN is enabled.
-When enabled, you do not need to provide dependency locations for TBB, Blosc, IlmBase and OpenEXR. Boost must be
-provided. IlmBase/OpenEXR can optionally be provided if Houdini Version >= 17.5.]=] OFF)
+When enabled, you do not need to provide dependency locations for TBB, Blosc, Imath and OpenEXR. Boost must be
+provided. Imath/OpenEXR can optionally be provided.]=] OFF)
 option(USE_MAYA [=[
 Build the library against a Maya installation. Turns on automatically if OPENVDB_BUILD_MAYA_PLUGIN is enabled.
 When enabled, you do not need to provide dependency locations for TBB. All other dependencies must be provided.]=] OFF)
@@ -135,9 +135,7 @@ Disable CMakes default system search paths when locating dependencies. When enab
 its default system search routine if it cannot find a dependency with the provided settings. When disabled, only
 paths provided through the Xxx_ROOT, supported XXX_INCLUDEDIR/XXX_LIBRARYDIR variables or the SYSTEM_LIBRARY_PATHS
 list will be searched.]=] OFF)
-option(OPENVDB_USE_DEPRECATED_ABI_7 "Bypass minimum ABI requirement checks" OFF)
-option(OPENVDB_USE_DEPRECATED_ABI_8 "Bypass minimum ABI requirement checks" OFF)
-option(OPENVDB_USE_FUTURE_ABI_10 "Bypass future ABI check" OFF)
+
 option(OPENVDB_FUTURE_DEPRECATION "Generate messages for upcoming deprecation" ON)
 option(OPENVDB_ENABLE_UNINSTALL "Adds a CMake uninstall target." ON)
 option(USE_COLORED_OUTPUT "Always produce ANSI-colored output (GNU/Clang only)." OFF)
@@ -251,9 +249,6 @@ mark_as_advanced(
   OPENVDB_USE_DELAYED_LOADING
   OPENVDB_FUTURE_DEPRECATION
   OPENVDB_SIMD
-  OPENVDB_USE_DEPRECATED_ABI_7
-  OPENVDB_USE_DEPRECATED_ABI_8
-  OPENVDB_USE_FUTURE_ABI_10
   SYSTEM_LIBRARY_PATHS
   USE_CCACHE
   USE_COLORED_OUTPUT
@@ -270,6 +265,13 @@ mark_as_advanced(
 
 include(cmake/config/OpenVDBVersions.cmake)
 
+foreach(DEPRECATED_ABI ${OPENVDB_DEPRECATED_ABI_LIST})
+  option(OPENVDB_USE_DEPRECATED_ABI_${DEPRECATED_ABI} "Bypass minimum ABI requirement checks" OFF)
+  mark_as_advanced(OPENVDB_USE_DEPRECATED_ABI_${DEPRECATED_ABI})
+endforeach()
+option(OPENVDB_USE_FUTURE_ABI_${FUTURE_OPENVDB_ABI_VERSION} "Bypass future ABI check" OFF)
+mark_as_advanced(OPENVDB_USE_FUTURE_ABI_${FUTURE_OPENVDB_ABI_VERSION})
+
 #########################################################################
 
 enable_testing()
@@ -279,13 +281,11 @@ enable_testing()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 # Add cmake modules to installation command
-# @todo fix our glew cmake module
 
 if(OPENVDB_INSTALL_CMAKE_MODULES)
   set(OPENVDB_CMAKE_MODULES
     cmake/FindBlosc.cmake
     cmake/FindJemalloc.cmake
-    cmake/FindIlmBase.cmake
     cmake/FindLog4cplus.cmake
     cmake/FindOpenEXR.cmake
     cmake/FindOpenVDB.cmake
@@ -384,12 +384,16 @@ endif()
 # Configure SIMD. AVX implies SSE 4.2.
 
 if(OPENVDB_SIMD STREQUAL "AVX")
-  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-mavx>")
-  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-msse4.2>")
+  if (CMAKE_SYSTEM_PROCESSOR MATCHES "(x86)|(X86)|(amd64)|(AMD64)")
+    add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-mavx>")
+    add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-msse4.2>")
+  endif()
   add_compile_definitions("$<$<COMPILE_LANGUAGE:CXX>:OPENVDB_USE_AVX>")
   add_compile_definitions("$<$<COMPILE_LANGUAGE:CXX>:OPENVDB_USE_SSE42>")
 elseif(OPENVDB_SIMD STREQUAL "SSE42")
-  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-msse4.2>")
+  if (CMAKE_SYSTEM_PROCESSOR MATCHES "(x86)|(X86)|(amd64)|(AMD64)")
+    add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-msse4.2>")
+  endif()
   add_compile_definitions("$<$<COMPILE_LANGUAGE:CXX>:OPENVDB_USE_SSE42>")
 endif()
 
@@ -400,7 +404,6 @@ endif()
 if(USE_STATIC_DEPENDENCIES)
   set(BLOSC_USE_STATIC_LIBS ON)
   set(OPENEXR_USE_STATIC_LIBS ON)
-  set(ILMBASE_USE_STATIC_LIBS ON)
   set(TBB_USE_STATIC_LIBS ON)
   set(LOG4CPLUS_USE_STATIC_LIBS ON)
   set(JEMALLOC_USE_STATIC_LIBS ON)
@@ -486,14 +489,14 @@ if(OpenVDB_ABI LESS MINIMUM_OPENVDB_ABI_VERSION)
     "no longer supported.")
 endif()
 
-if(FUTURE_MINIMUM_OPENVDB_ABI_VERSION AND OpenVDB_ABI LESS FUTURE_MINIMUM_OPENVDB_ABI_VERSION)
+if(OpenVDB_ABI IN_LIST OPENVDB_DEPRECATED_ABI_LIST)
   if(NOT OPENVDB_USE_DEPRECATED_ABI_${OpenVDB_ABI})
-    message(FATAL_ERROR "OpenVDB ABI versions earlier than ${FUTURE_MINIMUM_OPENVDB_ABI_VERSION} "
+    message(FATAL_ERROR "OpenVDB ABI versions earlier than ${OpenVDB_MAJOR_VERSION} "
       "are deprecated. Set CMake option OPENVDB_USE_DEPRECATED_ABI_${OpenVDB_ABI} to ON to "
       "suppress this error.")
   endif()
 
-  message(DEPRECATION "OpenVDB ABI versions earlier than ${FUTURE_MINIMUM_OPENVDB_ABI_VERSION} "
+  message(DEPRECATION "OpenVDB ABI versions earlier than ${OpenVDB_MAJOR_VERSION} "
     "are deprecated and will soon be removed.")
   # global target definition
   add_definitions(-DOPENVDB_USE_DEPRECATED_ABI_${OpenVDB_ABI})
