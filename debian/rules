@@ -1,4 +1,242 @@
 #!/usr/bin/make -f
+#export DH_VERBOSE=1
 
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+include /usr/share/dpkg/default.mk
+
+# OpenVDB AX is a beast to compile on some low mem arches such as mipsel (https://bugs.debian.org/1025144)
+# Do not build AX on alpha & hppa since no LLVM
+AX_ARCHS=amd64 arm64 armel armhf i386 mips64el ppc64el s390x arc hurd-i386 ia64 kfreebsd-amd64 kfreebsd-i386 m68k powerpc ppc64 riscv64 sh4 sparc64 x32
+ifneq (,$(filter $(DEB_HOST_ARCH), $(AX_ARCHS)))
+  WITH_AX=ON
+else
+  WITH_AX=OFF
+endif
+
+WITH_VDB_TOOL=ON
+ifneq (,$(filter $(DEB_HOST_ARCH), mipsel))
+  WITH_VDB_TOOL=OFF
+endif
+
+# Lower max parallel jobs always:
+DH_FLAGS = --max-parallel=2
+
+ifneq (,$(filter $(DEB_HOST_ARCH), armel armhf arm64 ppc64el))
+  # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=77728
+  DEB_CXXFLAGS_MAINT_APPEND += -Wno-psabi
+endif
+
+# default setting
+WITH_EXPLICIT_INSTANTIATION=ON
+
+# `virtual memory exhausted: Cannot allocate memory` is the new ICE
+ifeq ($(DEB_BUILD_ARCH_BITS),32)
+# Lower memory requirements on architectures with only 2 GB address space
+WITH_EXPLICIT_INSTANTIATION=OFF
+ifneq (,$(filter $(DEB_HOST_ARCH), mipsel))
+  # smaller debug packages:
+  CXXFLAGS := $(CXXFLAGS:-g=-g1)
+  CXXFLAGS := $(CXXFLAGS:-O2=-O1)
+  DEB_CXXFLAGS_MAINT_APPEND += --param ggc-min-expand=10
+  # makes linking slower, so it shouldn't be enabled when not needed:
+  DEB_LDFLAGS_MAINT_APPEND += -Wl,--no-keep-memory -Wl,--reduce-memory-overhead
+  # openvdb.cc:(.text+0x7c): relocation truncated to fit: R_MIPS_CALL16 against `pthread_once@@GLIBC_2.34'
+  DEB_CXXFLAGS_MAINT_APPEND += -mxgot
+  DH_FLAGS = --max-parallel=1
+else ifneq (,$(filter $(DEB_HOST_ARCH), armel))
+  # smaller debug packages:
+  CXXFLAGS := $(CXXFLAGS:-g=-g1)
+  CXXFLAGS := $(CXXFLAGS:-O2=-Os)
+  DEB_CXXFLAGS_MAINT_APPEND += --param ggc-min-expand=10
+else
+  # reduce memory pressure also on i386 buildds:
+  CXXFLAGS := $(CXXFLAGS:-g=-g1)
+  CXXFLAGS := $(CXXFLAGS:-O2=-Os)
+  # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=78971
+  DEB_CXXFLAGS_MAINT_APPEND += --param ggc-min-expand=20
+endif
+endif
+
+VER_FULL = $(DEB_VERSION_UPSTREAM)
+VER_SONAME = $(shell echo $(DEB_VERSION_UPSTREAM) | cut -f1-2 -d.)
+
+# technically the following should reduce the amount of symbols being exported,
+# it turns out this does not work in practice:
+# https://bugs.debian.org/997080
+#DEB_CFLAGS_MAINT_APPEND += -fvisibility=hidden -fvisibility-inlines-hidden
+#DEB_CXXFLAGS_MAINT_APPEND += -fvisibility=hidden -fvisibility-inlines-hidden
+
+export DEB_CXXFLAGS_MAINT_APPEND
+export DEB_LDFLAGS_MAINT_APPEND
+
+# deduce documentation option (build-indep target)
+ifeq (,$(filter %-doc,$(shell dh_listpackages)))
+  BUILDDOC = OFF
+else ifneq (,$(filter nodoc,$(DEB_BUILD_OPTIONS)))
+  BUILDDOC = OFF
+else
+  BUILDDOC = ON
+endif
+
+# remove test if specified:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+  BUILDTEST = ON
+  ifeq ($(WITH_AX),ON)
+    BUILDTEST_AX = ON
+  else
+    BUILDTEST_AX = OFF
+  endif
+else
+  BUILDTEST = OFF
+  BUILDTEST_AX = OFF
+endif
+
+# notes:
+# - https://github.com/AcademySoftwareFoundation/openvdb/issues/144#issuecomment-508984426
+# - Force tbbmalloc for simplicity since jemalloc breaks python plugins. (#951704)
+CONCURRENT_MALLOC = Tbbmalloc
+ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
+  CONCURRENT_MALLOC = None
+endif
+
+WITH_CUDA ?= OFF
+
+# https://bugs.debian.org/1025142
+WITH_RPATH ?= OFF
+
+# cannot use cmake+ninja because of -doc package:
 %:
-	dh $@
+	dh $@ --with python3 --buildsystem=cmake $(DH_FLAGS)
+
+MPL: LICENSE
+	cp -f $< $@
+
+PYVERS := $(shell py3versions -rd)
+
+CMAKE_EXTRA_FLAGS = \
+	-DBUILD_TEST:BOOL=$(BUILDTEST) \
+	-DCMAKE_SKIP_RPATH:BOOL=ON \
+	-DCONCURRENT_MALLOC:STRING=$(CONCURRENT_MALLOC) \
+	-DNANOVDB_BUILD_BENCHMARK:BOOL=OFF \
+	-DNANOVDB_BUILD_EXAMPLES:BOOL=OFF \
+	-DNANOVDB_BUILD_UNITTESTS:BOOL=$(BUILDTEST) \
+	-DNANOVDB_CUDA_KEEP_PTX:BOOL=$(WITH_CUDA) \
+	-DNANOVDB_USE_CUDA:BOOL=$(WITH_CUDA) \
+	-DNANOVDB_USE_INTRINSICS:BOOL=ON \
+	-DNANOVDB_USE_OPENVDB:BOOL=ON \
+	-DOPENVDB_AX_STATIC:BOOL=OFF \
+	-DOPENVDB_BUILD_AX:BOOL=$(WITH_AX) \
+	-DOPENVDB_BUILD_AX_GRAMMAR:BOOL=$(WITH_AX) \
+	-DOPENVDB_BUILD_AX_UNITTESTS:BOOL=$(BUILDTEST_AX) \
+	-DOPENVDB_BUILD_DOCS:BOOL=$(BUILDDOC) \
+	-DOPENVDB_BUILD_NANOVDB:BOOL=ON \
+	-DOPENVDB_BUILD_PYTHON_MODULE:BOOL=ON \
+	-DOPENVDB_BUILD_PYTHON_UNITTESTS:BOOL=$(BUILDTEST) \
+	-DOPENVDB_BUILD_UNITTESTS:BOOL=$(BUILDTEST) \
+	-DOPENVDB_BUILD_VDB_AX:BOOL=$(WITH_AX) \
+	-DOPENVDB_BUILD_VDB_LOD:BOOL=ON \
+	-DOPENVDB_BUILD_VDB_RENDER:BOOL=ON \
+	-DOPENVDB_BUILD_VDB_TOOL:BOOL=$(WITH_VDB_TOOL) \
+	-DOPENVDB_BUILD_VDB_VIEW:BOOL=ON \
+	-DOPENVDB_CORE_STATIC:BOOL=OFF \
+	-DOPENVDB_ENABLE_RPATH:BOOL=$(WITH_RPATH) \
+	-DOPENVDB_TOOL_USE_EXR:BOOL=ON \
+	-DOPENVDB_TOOL_USE_JPG:BOOL=ON \
+	-DOPENVDB_TOOL_USE_NANO:BOOL=ON \
+	-DOPENVDB_TOOL_USE_PNG:BOOL=ON \
+	-DPython_EXECUTABLE:FILEPATH=/usr/bin/$(PYVERS) \
+	-DUSE_AX:BOOL=$(WITH_AX) \
+	-DUSE_BLOSC:BOOL=ON \
+	-DUSE_EXPLICIT_INSTANTIATION:BOOL=$(WITH_EXPLICIT_INSTANTIATION) \
+	-DUSE_EXR:BOOL=ON \
+	-DUSE_IMATH_HALF:BOOL=ON \
+	-DUSE_LOG4CPLUS:BOOL=ON \
+	-DUSE_NANOVDB:BOOL=ON \
+	-DUSE_NUMPY:BOOL=ON \
+	-DUSE_PNG:BOOL=ON\
+	-DCMAKE_CXX_FLAGS="-ftemplate-depth=1024"\
+	-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF
+
+
+
+VDB_MANPAGES = debian/vdb_lod.1 debian/vdb_print.1 debian/vdb_render.1 debian/vdb_view.1
+ifeq ($(WITH_VDB_TOOL),ON)
+  VDB_MANPAGES += debian/vdb_tool.1
+endif
+
+pkg_arun = libopenvdb-ax-tools
+pkg_nrun = libnanovdb-tools
+pkg_orun = libopenvdb-tools
+pkg_alib = libopenvdb-ax$(VER_SONAME)
+pkg_olib = libopenvdb$(VER_SONAME)
+pkg_adev = libopenvdb-ax-dev
+pkg_ndev = libnanovdb-dev
+pkg_odev = libopenvdb-dev
+pkg_doc = libopenvdb-doc
+pkg_py  = python3-openvdb
+
+override_dh_auto_configure:
+	dh_auto_configure -- $(CMAKE_EXTRA_FLAGS)
+override_dh_installdocs: MPL
+	dh_installdocs -A $^
+override_dh_clean:
+	dh_clean doc/doxygen_sqlite3.db
+	dh_clean debian/*.1
+
+override_dh_auto_test-arch:
+	timeout 2h dh_auto_test -- $(TESTOPS) || true
+override_dh_install-arch: manpages
+	# update manpage listing:
+	for manpage in $(VDB_MANPAGES); do \
+		echo $$manpage >> debian/libopenvdb-tools.manpages \
+		; \
+	done
+	dh_numpy3 --package=$(pkg_py)
+	dh_install -p$(pkg_arun) debian/tmp/usr/bin/vdb_ax usr/bin
+	dh_install -p$(pkg_nrun) debian/tmp/usr/bin/nano* usr/bin
+	dh_install -p$(pkg_orun) -Xax debian/tmp/usr/bin/vdb* usr/bin
+	dh_install -p$(pkg_alib) debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libopenvdb_ax.so.$(VER_FULL)
+	dh_install -p$(pkg_alib) debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libopenvdb_ax.so.$(VER_SONAME)
+	dh_install -p$(pkg_olib) debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libopenvdb.so.$(VER_FULL)
+	dh_install -p$(pkg_olib) debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libopenvdb.so.$(VER_SONAME)
+	dh_install -p$(pkg_adev) debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libopenvdb_ax.so
+	dh_install -p$(pkg_odev) debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libopenvdb.so
+	dh_install -p$(pkg_odev) debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/cmake
+	dh_install -p$(pkg_adev) debian/tmp/usr/include/openvdb_ax* usr/include
+	dh_install -p$(pkg_ndev) debian/tmp/usr/include/nanovdb* usr/include
+	dh_install -p$(pkg_odev) -Xax debian/tmp/usr/include/openvdb* usr/include
+	dh_install -p$(pkg_py)  debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/$(PYVERS)/dist-packages/pyopenvdb.*.so      usr/lib/$(PYVERS)/dist-packages/
+
+override_dh_auto_build-indep:
+	dh_auto_build -- doc
+override_dh_auto_test-indep:
+	# No tests needed for docs
+override_dh_auto_install-indep:
+	dh_auto_install -- -C doc
+override_dh_install-indep:
+	dh_install -p$(pkg_doc) debian/tmp/usr/share/doc/OpenVDB/html usr/share/doc/libopenvdb-doc/
+
+#override_dh_shlibdeps:
+#	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info
+
+debian/%.1: debian/%.1.in
+	LD_PRELOAD= LD_LIBRARY_PATH=./debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH) help2man --version-string=$(VER_FULL) --include=$< --output=$@ --no-info --no-discard-stderr ./debian/tmp/usr/bin/`basename $@ .1`
+	echo "Done generation $@"
+
+.PHONY: manpages vdb_manpages vdb_ax_manpages nano_manpages
+
+vdb_manpages: $(VDB_MANPAGES)
+vdb_ax_manpages: debian/vdb_ax.1
+nano_manpages: debian/nanovdb_convert.1 debian/nanovdb_print.1 debian/nanovdb_validate.1
+ifeq ($(WITH_AX),ON)
+manpages: vdb_manpages nano_manpages vdb_ax_manpages
+else
+manpages: vdb_manpages nano_manpages
+endif
+
+debian/control: debian/control.in
+	sed -e "s/@AX_ARCHS@/$(AX_ARCHS)/g" $< > $@
+
+get-orig-source:
+	uscan --verbose --force-download --rename --repack

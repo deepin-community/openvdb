@@ -1,0 +1,6 @@
+#the following is obviously commented out
+use_svg.patch
+atomic.patch
+80c95eea47d1025f49744a3f701a2f94b770814c.patch
+unittests.patch
+llvm.patch

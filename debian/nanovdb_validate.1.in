@@ -1,0 +1,6 @@
+[NAME]
+nanovdb_validate - Validates grids in one or more NanoVDB files
+
+[AUTHOR]
+This manual page was written by Mathieu Malaterre <malat@debian.org> for the
+Debian GNU/Linux system (but may be used by others).

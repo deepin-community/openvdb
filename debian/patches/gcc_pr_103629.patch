@@ -1,0 +1,38 @@
+Description: gcc pr 103629
+ Rational is at:
+ https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=997080#46
+Author: Mathieu Malaterre <malat@debian.org>
+Forwarded: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=103629
+Last-Update: 2022-08-24
+
+Index: openvdb/openvdb/openvdb/tree/Tree.h
+===================================================================
+--- openvdb.orig/openvdb/openvdb/tree/Tree.h
++++ openvdb/openvdb/openvdb/tree/Tree.h
+@@ -174,7 +174,7 @@ public:
+ 
+ 
+ template<typename _RootNodeType>
+-class Tree: public TreeBase
++class OPENVDB_API Tree: public TreeBase
+ {
+ public:
+     using Ptr = SharedPtr<Tree>;
+@@ -1951,6 +1951,7 @@ Tree<RootNodeType>::treeType()
+     static std::once_flag once;
+     std::call_once(once, []()
+     {
++        std::printf("%p\n", &sTreeTypeName);
+         std::vector<Index> dims;
+         Tree::getNodeLog2Dims(dims);
+         std::ostringstream ostr;
+@@ -1960,6 +1961,9 @@ Tree<RootNodeType>::treeType()
+         }
+         sTreeTypeName.reset(new Name(ostr.str()));
+     });
++    std::printf("%p\n", &sTreeTypeName);
++    if (!sTreeTypeName)
++        throw "uhoh";
+     return *sTreeTypeName;
+ }
+ 

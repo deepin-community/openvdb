@@ -1,5 +1,716 @@
-template-repository (1.0-1) unstable; urgency=medium
+openvdb (11.0.0-0deepin2) unstable; urgency=medium
 
-  * Initial release
+  * Disable INTERPROCEDURAL_OPTIMIZATION 
 
- -- Tsic404 <liuheng@deepin.org>  Sat, 28 Jan 2023 13:46:49 +0800
+ -- xiangzelong <xiangzelong@deepin.org>  Tue, 24 Sep 2024 13:34:47 +0800
+
+openvdb (11.0.0-0deepin1) unstable; urgency=medium
+
+  * Revert t64.
+  * New upstream version.
+
+ -- xiangzelong <xiangzelong@deepin.org>  Mon, 09 Sep 2024 15:53:05 +0800
+
+openvdb (10.0.1-2.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Rename libraries for 64-bit time_t transition.  Closes: #1063107
+
+ -- Steve Langasek <vorlon@debian.org>  Fri, 01 Mar 2024 19:17:49 +0000
+
+openvdb (10.0.1-2) unstable; urgency=medium
+
+  * debian/control: Fix dependency of libopenvdb-ax-dev on shared library
+    (Closes: #1035454)
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Thu, 04 May 2023 23:14:05 +0200
+
+openvdb (10.0.1-1) unstable; urgency=medium
+
+  * New upstream version 10.0.1
+  * d/patches: Refresh patches for new upstream
+
+ -- Mathieu Malaterre <malat@debian.org>  Mon, 02 Jan 2023 10:08:14 +0100
+
+openvdb (10.0.0-15) unstable; urgency=medium
+
+  * Upload to unstable
+
+ -- Mathieu Malaterre <malat@debian.org>  Sun, 18 Dec 2022 10:22:49 +0100
+
+openvdb (10.0.0-14) experimental; urgency=medium
+
+  * d/rules: Do not build vdb_tool on mipsel
+  * d/rules: Use -O1 on mipsel. Closes: #1026010
+
+ -- Mathieu Malaterre <malat@debian.org>  Wed, 14 Dec 2022 08:46:20 +0100
+
+openvdb (10.0.0-13) experimental; urgency=medium
+
+  * d/rules: i386 seems to also have limited memory
+  * d/rules: Add missing `-mxgot` CXXFLAGS for mipsel
+
+ -- Mathieu Malaterre <malat@debian.org>  Fri, 09 Dec 2022 18:26:20 +0100
+
+openvdb (10.0.0-12) experimental; urgency=medium
+
+  * d/rules: Do not use extern template on 32bits
+  * d/rules: No parallel job on mipsel
+
+ -- Mathieu Malaterre <malat@debian.org>  Thu, 08 Dec 2022 08:43:11 +0100
+
+openvdb (10.0.0-11) experimental; urgency=medium
+
+  * d/rules: Lower memory requirement on armel
+  * d/rules: Lower even more mem requirement on mipsel
+  * d/patches: Yet another fix for ax unit-test failure
+
+ -- Mathieu Malaterre <malat@debian.org>  Tue, 06 Dec 2022 08:21:40 +0100
+
+openvdb (10.0.0-10) experimental; urgency=medium
+
+  * d/rules: Fix logic for building AX unit test
+  * d/rules: Downgrade opt level to O1 on mipsel
+  * d/patches: Yet another pass at fixing unit tests
+
+ -- Mathieu Malaterre <malat@debian.org>  Mon, 05 Dec 2022 08:10:11 +0100
+
+openvdb (10.0.0-9) experimental; urgency=medium
+
+  * d/rules: Tweak malloc libraries handling
+  * d/rules: Simplify nodoc handling
+  * d/rules: Set max parallel jobs to 2
+  * d/rules: Use RPATH handling. Closes: #1025142
+  * d/patches: Fix llvm and definitions on 32bits arches
+  * d/control: Split OpenVDB/AX from main package. Closes: #1025144
+  * d/rules: Prefer WITH_CUDA with an underscore
+  * d/patches: Remove a warning in test on 32bits
+
+ -- Mathieu Malaterre <malat@debian.org>  Wed, 30 Nov 2022 13:37:06 +0100
+
+openvdb (10.0.0-8) experimental; urgency=medium
+
+  * d/patches: Remove UB on 32bits arches
+  * d/rules: Give up on RPATH handling
+  * d/rules: Start parallel building again
+  * d/patches: Prefer patch from upstream
+  * d/rules: Yet another pass at virtual memory exhausted
+  * d/patches: Remove warnings on 32bits arches
+
+ -- Mathieu Malaterre <malat@debian.org>  Tue, 29 Nov 2022 08:24:58 +0100
+
+openvdb (10.0.0-7) experimental; urgency=medium
+
+  * d/manpages: Add missing manpages
+  * d/patches: Prefer patch from upstream
+  * d/rules: virtual memory exhausted: Cannot allocate memory
+  * d/control: Requires llvm-14 for now
+
+ -- Mathieu Malaterre <malat@debian.org>  Mon, 28 Nov 2022 09:42:54 +0100
+
+openvdb (10.0.0-6) experimental; urgency=medium
+
+  * d/control: Update minimum version dependencies
+  * d/rules: Add note about cmake+ninja
+  * d/rules: Another attempt at fixing mipsel FTBFS
+  * d/rules: Build and install vdb_tool
+  * d/rules: Start using explicit template mechnasm
+  * d/control: Start building OpenVDB/AX & NanoVDB modules
+
+ -- Mathieu Malaterre <malat@debian.org>  Thu, 24 Nov 2022 10:37:04 +0100
+
+openvdb (10.0.0-5) experimental; urgency=medium
+
+  * d/rules: Remove a warning on ppc64el
+  * d/rules: Fix a pile of build vs host confusions
+  * d/rules: Yet another attempt at low-mem arch FTBFS
+  * d/patches: Refresh unittests patch
+
+ -- Mathieu Malaterre <malat@debian.org>  Tue, 22 Nov 2022 08:03:06 +0100
+
+openvdb (10.0.0-4) experimental; urgency=medium
+
+  * d/patches: Try to get test-suite building on 32bits arches
+  * d/rules: Try harder to get unit-test building on 32bits
+
+ -- Mathieu Malaterre <malat@debian.org>  Fri, 18 Nov 2022 15:28:13 +0100
+
+openvdb (10.0.0-3) experimental; urgency=medium
+
+  * d/rules: Remove parallel building
+
+ -- Mathieu Malaterre <malat@debian.org>  Tue, 15 Nov 2022 14:49:11 +0100
+
+openvdb (10.0.0-2) experimental; urgency=medium
+
+  * d/rules: Remove a note message from compilation log
+  * d/rules: Give up on second-class arches
+
+ -- Mathieu Malaterre <malat@debian.org>  Tue, 15 Nov 2022 13:25:59 +0100
+
+openvdb (10.0.0-1) experimental; urgency=medium
+
+  * New upstream version 10.0.0
+  * d/control: Migrate to 10.0
+  * d/patches: Refresh patches for 10.0 release
+
+ -- Mathieu Malaterre <malat@debian.org>  Mon, 07 Nov 2022 12:19:29 +0100
+
+openvdb (9.1.0-7) unstable; urgency=medium
+
+  * d/rules: Remove O2 flag on armel
+
+ -- Mathieu Malaterre <malat@debian.org>  Fri, 26 Aug 2022 08:05:52 +0200
+
+openvdb (9.1.0-6) unstable; urgency=medium
+
+  * d/patches: Remove bogus reference
+  * d/rules: Remove bogus compilation flag on armel
+
+ -- Mathieu Malaterre <malat@debian.org>  Thu, 25 Aug 2022 21:53:11 +0200
+
+openvdb (9.1.0-5) unstable; urgency=medium
+
+  * d/control: Make sure to use tbb >= 2019.0
+  * d/rules: Disable -O2 on armhf, riscv64 and x32
+  * d/rules: Do not use gcc/visibility flags. Closes: #997080
+
+ -- Mathieu Malaterre <malat@debian.org>  Thu, 25 Aug 2022 09:57:27 +0200
+
+openvdb (9.1.0-4) unstable; urgency=medium
+
+  * d/rules: Prefer DEB_CFLAGS_MAINT_APPEND over CXXFLAGS
+  * d/rules: Remove explicit setting of DEB_BUILD_OPTIONS
+  * d/patches: Add explicit message about gcc pr 103629
+
+ -- Mathieu Malaterre <malat@debian.org>  Wed, 24 Aug 2022 16:11:54 +0200
+
+openvdb (9.1.0-3) unstable; urgency=medium
+
+  * d/control: Migrate to OpenEXR 3.x (remove ref to ilmbase)
+  * d/patches: Remove simple warning from compilation log
+  * d/rules: Update for debhelper 13. Remove lintian warnings
+
+ -- Mathieu Malaterre <malat@debian.org>  Wed, 24 Aug 2022 10:17:14 +0200
+
+openvdb (9.1.0-2) unstable; urgency=medium
+
+  * Upload to unstable. Closes: #1011215
+
+ -- Mathieu Malaterre <malat@debian.org>  Tue, 23 Aug 2022 13:22:58 +0200
+
+openvdb (9.1.0-1) experimental; urgency=medium
+
+  * d/patches: Sync gcc default std version
+  * d/compat Update compat to 13
+  * New upstream version 9.1.0
+  * d/patches: Refresh patches with latest release
+  * d/control: Update for 9.1 release
+  * d/control: Bump Std-Vers to 4.6.1 no changes needed
+  * d/rules: Make sure to install cmake modules
+
+ -- Mathieu Malaterre <malat@debian.org>  Fri, 24 Jun 2022 15:09:22 +0200
+
+openvdb (9.0.0-3) experimental; urgency=medium
+
+  * d/rules: Remove explicit --parallel to fix lintian warning
+  * d/copyright: Remove a warning reported by lintian
+  * d/rules: Do not use explicit template instantiation
+
+ -- Mathieu Malaterre <malat@debian.org>  Sat, 04 Dec 2021 20:08:51 +0100
+
+openvdb (9.0.0-2) experimental; urgency=medium
+
+  * d/control: Add missing b-d on libpng-dev
+  * d/README: Add note about jemalloc
+  * d/control: Bump Std-Vers to 4.6.0 no changes needed
+
+ -- Mathieu Malaterre <malat@debian.org>  Thu, 02 Dec 2021 21:04:44 +0100
+
+openvdb (9.0.0-1) experimental; urgency=medium
+
+  * New upstream version 9.0.0
+  * d/patches: Refresh patches
+  * d/rules: Remove hidden flag for now
+  * d/control: Update to release 9.0
+  * d/rules: Minor comments cleanup
+  * d/rules: Adapt to latest cmake installation location
+  * d/rules: Adapt to latest cmake user options
+
+ -- Mathieu Malaterre <malat@debian.org>  Mon, 29 Nov 2021 17:03:32 +0100
+
+openvdb (8.1.0-3) unstable; urgency=medium
+
+  * Team upload.
+
+  * d/control: libgmock-dev b-dep added
+
+ -- Matteo F. Vescovi <mfv@debian.org>  Wed, 15 Sep 2021 22:24:55 +0200
+
+openvdb (8.1.0-2) unstable; urgency=medium
+
+  * Team upload.
+
+  * d/control: add libgtest-dev to b-deps (Closes: #993628)
+
+ -- Matteo F. Vescovi <mfv@debian.org>  Tue, 14 Sep 2021 23:20:26 +0200
+
+openvdb (8.1.0-1) unstable; urgency=medium
+
+  * New upstream version 8.1.0
+  * d/control: Reflect SOVERSION to package version
+  * d/rules: Adapt to latest cmake change
+  * d/patches: Refresh patches
+  * d/rules: Fix doc installation
+
+ -- Mathieu Malaterre <malat@debian.org>  Sun, 29 Aug 2021 13:56:50 +0200
+
+openvdb (7.1.0-2) unstable; urgency=medium
+
+  * d/compat: Update compat to 11
+
+ -- Mathieu Malaterre <malat@debian.org>  Thu, 10 Sep 2020 08:08:43 +0200
+
+openvdb (7.1.0-1) experimental; urgency=medium
+
+  * New upstream version 7.1.0
+  * d/patches: Remove tbb.patch fixed upstream
+  * d/patches: Refresh offsets in patches
+  * d/patches: Remove patch removecxx14.patch not required anymore
+  * d/control: Simplify boost dependencies
+  * d/control: Run wrap-and-sort
+  * d/control: Update for SOVERSION 7.1
+
+ -- Mathieu Malaterre <malat@debian.org>  Thu, 20 Aug 2020 13:53:25 +0200
+
+openvdb (7.0.0-3) unstable; urgency=medium
+
+  * d/vdb_lod.1: Fix typo in man page
+  * d/control: Not-ideal solution for building against default python version. Closes: #951829
+  * d/control: Remove lintian warning ancient-python-version-field
+
+ -- Mathieu Malaterre <malat@debian.org>  Fri, 10 Apr 2020 21:24:02 +0200
+
+openvdb (7.0.0-2) unstable; urgency=medium
+
+  * d/control: Add missing ref to vdb_lod
+
+ -- Mathieu Malaterre <malat@debian.org>  Mon, 23 Mar 2020 08:49:33 +0100
+
+openvdb (7.0.0-1) experimental; urgency=medium
+
+  * New upstream version 7.0.0
+  * d/patches: Refresh patches for new release
+  * d/control: Update package version since new ABI
+  * d/rules: Update rules file to match new upstream
+  * d/control: Replace python3-all-dev with python3.7-dev. Closes: #951829
+  * d/control: Remove dependency to jemalloc. See #951704 for details
+  * d/rules: Add missing log4cplus cmake option
+
+ -- Mathieu Malaterre <malat@debian.org>  Thu, 05 Mar 2020 15:55:40 +0000
+
+openvdb (6.2.1-8) unstable; urgency=medium
+
+  * d/control: Keep explicit X-Python3-Version reference
+
+ -- Mathieu Malaterre <malat@debian.org>  Fri, 21 Feb 2020 10:21:12 +0100
+
+openvdb (6.2.1-7) unstable; urgency=medium
+
+  * d/patches: Resolve all symbols of python module
+  * d/patches: Fix unit tests
+  * d/control: Remove explicit X-Python3-Version reference
+
+ -- Mathieu Malaterre <malat@debian.org>  Fri, 21 Feb 2020 08:52:44 +0100
+
+openvdb (6.2.1-6) experimental; urgency=medium
+
+  * d/rules: Add missing dependency on help2man
+
+ -- Mathieu Malaterre <malat@debian.org>  Wed, 19 Feb 2020 09:15:36 +0100
+
+openvdb (6.2.1-5) experimental; urgency=medium
+
+  * d/rules: Fix compilation issue on mipsel
+  * d/rules: do not build test with nocheck in DEB_BUILD_OPTIONS
+  * d/rules: Simplify python version handling. Closes: #948186
+  * d/rules: Simplify manpages generation
+  * d/rules: Remove static lib for now
+  * d/rules: Remove RPATH since not used
+  * d/patches: Remove explicit -std=c++11 from compilation line
+
+ -- Mathieu Malaterre <malat@debian.org>  Tue, 18 Feb 2020 22:17:59 +0100
+
+openvdb (6.2.1-4) experimental; urgency=medium
+
+  * d/control: Make sure to use cmake after 3.14 for numpy/cmake
+  * d/control: Update Std-Vers to 4.5.0, no changes needed
+  * d/control: add dep libxxf86vm-dev
+  * d/patch: Add support for arches where -latomic is required
+
+ -- Mathieu Malaterre <malat@debian.org>  Sun, 16 Feb 2020 21:04:20 +0100
+
+openvdb (6.2.1-3) experimental; urgency=medium
+
+  * d/patches: Make tbb inspection portable
+
+ -- Mathieu Malaterre <malat@debian.org>  Mon, 11 Nov 2019 18:14:12 +0100
+
+openvdb (6.2.1-2) experimental; urgency=medium
+
+  [ Mathieu Malaterre ]
+  * d/control: Add pkg-config dependency
+
+  [ GSR ]
+  * libopenvdb-dev should depend on libtbb-dev & libblosc-dev. Closes: #917306
+
+ -- Mathieu Malaterre <malat@debian.org>  Sun, 10 Nov 2019 17:54:58 +0100
+
+openvdb (6.2.1-1) experimental; urgency=medium
+
+  * New upstream version 6.2.1
+  * d/patches: refresh patches, remove unneeded
+  * d/patches: Force python3 system inspection
+  * d/rules: Switch to cmake build system
+  * d/control: Update missing dependencies
+  * d/control: Explicit reference X-Python3-Version: 3.7
+  * d/control: Update reference to SONAME
+  * d/patches: Add python3 patch
+  * d/manpages: Refresh manpages
+
+ -- Mathieu Malaterre <malat@debian.org>  Fri, 08 Nov 2019 14:01:51 +0100
+
+openvdb (5.2.0-7) unstable; urgency=medium
+
+  * d/control: Remove explicit X-Python-Version
+  * d/control: Update to latest Std-Vers. No changes needed
+
+ -- Mathieu Malaterre <malat@debian.org>  Fri, 18 Oct 2019 10:38:29 +0200
+
+openvdb (5.2.0-6) unstable; urgency=medium
+
+  [ Ondřej Nový ]
+  * d/copyright: Use https protocol in Format field.
+  * Use debhelper-compat instead of debian/compat.
+
+  [ Matthias Klose ]
+  * Only build with parallel=2 on arm64 and ppc64el.
+
+  [ Mathieu Malaterre ]
+  * debian/watch: Update to latest URL for download
+  * d/control: Move to Multimedia team packaging
+  * Move python package to python3. Closes: #849426, #937215
+
+ -- Mathieu Malaterre <malat@debian.org>  Mon, 30 Sep 2019 16:28:06 +0200
+
+openvdb (5.2.0-5.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Eliminate dependency on epydoc, which will be removed (closes: #933616)
+    - Update debian/control to remove Build-Depends-Indep: python-epydoc
+    - Update debian/rules to no longer build epydoc documentation
+
+ -- Kenneth J. Pronovici <pronovic@debian.org>  Fri, 02 Aug 2019 19:14:40 +0000
+
+openvdb (5.2.0-5) unstable; urgency=medium
+
+  * Upload to unstable
+
+ -- Mathieu Malaterre <malat@debian.org>  Mon, 19 Nov 2018 21:28:18 +0100
+
+openvdb (5.2.0-4) experimental; urgency=medium
+
+  [ Giovanni Mascellani ]
+  * FTBFS with boost1.67. Closes: 911891
+
+  [ Mathieu Malaterre ]
+  * Really prefer -g1 on mips/el
+
+ -- Mathieu Malaterre <malat@debian.org>  Mon, 19 Nov 2018 12:17:05 +0100
+
+openvdb (5.2.0-3) experimental; urgency=medium
+
+  * Revert --reduce-memory-overheads prefer -g1 for now
+
+ -- Mathieu Malaterre <malat@debian.org>  Thu, 15 Nov 2018 16:42:28 +0100
+
+openvdb (5.2.0-2) experimental; urgency=medium
+
+  * Pass --reduce-memory-overheads to gas on mips/mipsel
+
+ -- Mathieu Malaterre <malat@debian.org>  Wed, 14 Nov 2018 15:36:41 +0100
+
+openvdb (5.2.0-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Bump Std-Vers to 4.2.1, no changes needed
+
+ -- Mathieu Malaterre <malat@debian.org>  Thu, 25 Oct 2018 21:07:05 +0200
+
+openvdb (5.0.0-2) unstable; urgency=medium
+
+  * Bump Std-Vers to 4.1.3. No changes needed
+  * Add patch to cope with blosc API change. Closes: #894151
+    Thanks to Juhani Numminen for patch.
+
+ -- Mathieu Malaterre <malat@debian.org>  Wed, 04 Apr 2018 22:08:41 +0200
+
+openvdb (5.0.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Remove patch not needed: d/p/fixversionnamesrc.patch
+  * Remove patch applied upstream: d/p/install_lib.patch
+  * Add patch that remove explicit -std=c++11
+
+ -- Mathieu Malaterre <malat@debian.org>  Tue, 26 Dec 2017 10:41:24 +0100
+
+openvdb (4.0.2-3) unstable; urgency=medium
+
+  * Add dep on libilmbase-dev. Closes: #879896
+  * Fix build on sh4
+  * Bump Std-Vers to 4.1.2, no changes needed
+  * Install missing vdb_lod man page
+
+ -- Mathieu Malaterre <malat@debian.org>  Wed, 13 Dec 2017 12:55:40 +0100
+
+openvdb (4.0.2-2) unstable; urgency=high
+
+  * Fix build on mips*. Closes: #879636
+
+ -- Mathieu Malaterre <malat@debian.org>  Wed, 22 Nov 2017 21:46:44 +0100
+
+openvdb (4.0.2-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Bump Std-Vers to 4.1.0, no changes needed
+
+ -- Mathieu Malaterre <malat@debian.org>  Thu, 21 Sep 2017 22:15:57 +0200
+
+openvdb (3.2.0-2.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Fix build on mips*. Closes: #847752
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 24 Dec 2016 09:31:28 +0100
+
+openvdb (3.2.0-2) unstable; urgency=medium
+
+  * Reactivate old patch (refreshed). Closes: #835419
+    + d/p/size_t.patch
+  * Remove old patch, not needed anymore:
+    - d/p/fixnumpy.patch
+
+ -- Mathieu Malaterre <malat@debian.org>  Fri, 26 Aug 2016 12:13:08 +0200
+
+openvdb (3.2.0-1) unstable; urgency=medium
+
+  * new upstream
+  * make sure to remove c++11 compilation mode for now
+    + d/p/remove_cxx0.patch
+
+ -- Mathieu Malaterre <malat@debian.org>  Tue, 23 Aug 2016 14:44:24 +0200
+
+openvdb (3.1.0-4) unstable; urgency=medium
+
+  * Fix compilation with GCC6. Closes: #831067
+  * Bump Std-Vers to 3.9.8, no changes needed
+
+ -- Mathieu Malaterre <malat@debian.org>  Thu, 21 Jul 2016 11:37:42 +0200
+
+openvdb (3.1.0-3) unstable; urgency=medium
+
+  * FTBFS when built with dpkg-buildpackage -A. Closes: #807023
+  * public extension linked with libpython2.7. Closes: #801861
+  * add direct build-dependency on libglu. Closes: #813016
+
+ -- Mathieu Malaterre <malat@debian.org>  Tue, 01 Mar 2016 10:27:33 +0100
+
+openvdb (3.1.0-2) unstable; urgency=medium
+
+  * Fix compilation on 32bits. Closes: #801802
+
+ -- Mathieu Malaterre <malat@debian.org>  Fri, 16 Oct 2015 13:55:15 +0200
+
+openvdb (3.1.0-1) unstable; urgency=medium
+
+  * new upstream
+  * add c-blosc
+  * Remove symbols file, too complex to maintain
+  * register doc against doc-base
+  * Remove numpy warnings. Closes: #751761
+
+ -- Mathieu Malaterre <malat@debian.org>  Tue, 13 Oct 2015 17:03:48 +0200
+
+openvdb (3.0.0-3.2) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Build-depend on libtbb-dev (>= 4.3~20150611-0.1).
+  * Update symbols files.
+
+ -- Matthias Klose <doko@debian.org>  Sun, 06 Sep 2015 14:16:56 +0200
+
+openvdb (3.0.0-3.1) unstable; urgency=high
+
+  * Non-maintainer upload.
+  * Include -latomic in the linker line to deal with the new libtbb.
+    Closes: #787084.
+  * Regenerate the symbols file for the new libstdc++ ABI.
+    Closes: #791740.
+
+ -- Matthias Klose <doko@debian.org>  Thu, 03 Sep 2015 23:45:14 +0200
+
+openvdb (3.0.0-3) unstable; urgency=medium
+
+  * Fix symbols file on armhf/i386/ppc64
+
+ -- Mathieu Malaterre <malat@debian.org>  Wed, 10 Jun 2015 14:36:57 +0200
+
+openvdb (3.0.0-2) unstable; urgency=medium
+
+  * Fix symbols file manually.
+  * Fix debian/rules clean target (doxygen left a *.db file)
+
+ -- Mathieu Malaterre <malat@debian.org>  Thu, 28 May 2015 15:29:20 +0200
+
+openvdb (3.0.0-1) unstable; urgency=medium
+
+  * New upstream: 3.0
+  * Add a timeout for arm64. Closes: #770487
+  * Add symbols files
+
+ -- Mathieu Malaterre <malat@debian.org>  Tue, 26 May 2015 17:07:31 +0200
+
+openvdb (2.3.0-2) unstable; urgency=low
+
+  * Add python binding. Closes: #751763
+
+ -- Mathieu Malaterre <malat@debian.org>  Fri, 04 Jul 2014 10:37:00 +0200
+
+openvdb (2.3.0-1) unstable; urgency=low
+
+  * New release
+  * Build with log4cplus
+
+ -- Mathieu Malaterre <malat@debian.org>  Wed, 04 Jun 2014 14:24:29 +0200
+
+openvdb (2.1.0-1) unstable; urgency=low
+
+  * New upstream
+  * Build on armhf. Closes: #731905
+  * Remove patch applied upstream:
+    - debian/patches/fix715427.patch
+  * Fix compilation with gcc 4.8:
+    + debian/patches/fixcomp1.patch
+
+ -- Mathieu Malaterre <malat@debian.org>  Sat, 11 Jan 2014 19:27:54 +0100
+
+openvdb (2.0.0-3) unstable; urgency=low
+
+  * Upload to sid. Closes: #715427
+  * Bump Std-Vers to 3.9.5, no changes needed
+
+ -- Mathieu Malaterre <malat@debian.org>  Tue, 10 Dec 2013 09:03:34 +0100
+
+openvdb (2.0.0-2) experimental; urgency=low
+
+  * Fix compilation on 32bits arch
+  * Fix compilation on armhf/tbb
+
+ -- Mathieu Malaterre <malat@debian.org>  Mon, 02 Dec 2013 20:47:37 +0100
+
+openvdb (2.0.0-1) experimental; urgency=low
+
+  * New release: 2.0
+
+ -- Mathieu Malaterre <malat@debian.org>  Wed, 27 Nov 2013 11:03:04 +0100
+
+openvdb (1.2.2-1) experimental; urgency=low
+
+  * Take snapshot from upstream
+
+ -- Mathieu Malaterre <malat@debian.org>  Sun, 13 Oct 2013 16:11:51 +0200
+
+openvdb (1.2.0-2) experimental; urgency=low
+
+  * Incorporate changes from new dev tag
+
+ -- Mathieu Malaterre <malat@debian.org>  Thu, 18 Jul 2013 09:26:46 +0200
+
+openvdb (1.2.0-1) unstable; urgency=low
+
+  * New upstream. Fix vdb_view compilation (x86)
+  * Refresh patches
+
+ -- Mathieu Malaterre <malat@debian.org>  Thu, 04 Jul 2013 08:27:12 +0200
+
+openvdb (1.1.1-1) unstable; urgency=low
+
+  * New upstream. Need libjemalloc-dev as depends
+  * Refresh patches
+
+ -- Mathieu Malaterre <malat@debian.org>  Wed, 22 May 2013 21:17:32 +0200
+
+openvdb (1.1.0-1) unstable; urgency=low
+
+  * 1.1.0 release
+  * Refresh patches
+
+ -- Mathieu Malaterre <malat@debian.org>  Wed, 10 Apr 2013 10:44:23 +0200
+
+openvdb (1.0.0-1) unstable; urgency=low
+
+  * 1.0 release, stable API
+  * Upstream now ships source code as zip
+  * Refresh patches
+  * Use doxygen-latex package since latex is required for formulas
+
+ -- Mathieu Malaterre <malat@debian.org>  Mon, 18 Mar 2013 13:11:20 +0100
+
+openvdb (0.104.0-1) unstable; urgency=low
+
+  * New upstream
+  * Remove patch applied upstream:
+    - d/p/fix32bitscomp.patch
+  * Use LDFLAGS to fix lintian warnings
+
+ -- Mathieu Malaterre <malat@debian.org>  Sat, 16 Feb 2013 11:23:08 +0100
+
+openvdb (0.103.1-1) unstable; urgency=low
+
+  * New upstream
+  * Refreshed patch:
+    - debian/patches/fixversionnamesrc.patch
+
+ -- Mathieu Malaterre <malat@debian.org>  Sat, 16 Feb 2013 10:45:00 +0100
+
+openvdb (0.103.0-1) unstable; urgency=low
+
+  * New upstream
+  * Prefer SVG output in doxygen over heavy PNGs
+    - debian/patches/use_svg.patch
+  * Simplify doxygen B-D-I
+
+ -- Mathieu Malaterre <malat@debian.org>  Mon, 14 Jan 2013 12:52:26 +0100
+
+openvdb (0.102.0-1) unstable; urgency=low
+
+  * New upstream. Toward OpenVDB 1.0
+  * Refresh patches
+  * Update related to the copy-on-write changes.
+  * Update Std-Vers to 3.9.4, no changes needed
+
+ -- Mathieu Malaterre <malat@debian.org>  Wed, 19 Dec 2012 21:36:13 +0000
+
+openvdb (0.99.0-2) unstable; urgency=low
+
+  * Remove patch level from source code. Closes: #695665
+  * Fix compilation on powerpc/x86. Closes: #695689
+  * Execute the test suite in verbose mode
+
+ -- Mathieu Malaterre <malat@debian.org>  Wed, 12 Dec 2012 12:30:03 +0100
+
+openvdb (0.99.0-1) unstable; urgency=low
+
+  * Initial upload to Debian.  Closes: #689694
+
+ -- Mathieu Malaterre <malat@debian.org>  Wed, 05 Dec 2012 13:16:06 +0100

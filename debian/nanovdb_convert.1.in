@@ -1,0 +1,6 @@
+[NAME]
+nanovdb_convert - converts one or more OpenVDB files to a single NanoVDB file
+
+[AUTHOR]
+This manual page was written by Mathieu Malaterre <malat@debian.org> for the
+Debian GNU/Linux system (but may be used by others).
