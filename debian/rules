@@ -154,7 +154,10 @@ CMAKE_EXTRA_FLAGS = \
 	-DUSE_LOG4CPLUS:BOOL=ON \
 	-DUSE_NANOVDB:BOOL=ON \
 	-DUSE_NUMPY:BOOL=ON \
-	-DUSE_PNG:BOOL=ON 
+	-DUSE_PNG:BOOL=ON\
+	-DCMAKE_CXX_FLAGS="-ftemplate-depth=1024"\
+	-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF
+
 
 
 VDB_MANPAGES = debian/vdb_lod.1 debian/vdb_print.1 debian/vdb_render.1 debian/vdb_view.1
